@@ -2,6 +2,7 @@ package aaa;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
@@ -48,17 +49,26 @@ public class App
             sqls.add("SELECT * FROM TEST_TABLE T WHERE T.ID IN ('1', '2')");
             sqls.add("SELECT * FROM dogs INNER JOIN owners ON dogs.owner_id = owners.id;");
             sqls.add("SELECT * FROM USERS U WHERE EXISTS (SELECT '1' FROM DELETED_USERS D WHERE U.ID = D.ID)");
-            sqls.add("UPDATE USERS SET COMMENT = 'TEST'; SELECT * FROM TEST");
+            sqls.add("UPDATE USERS SET COMMENT = 'TEST'");
+            /** https://docs.microsoft.com/ja-jp/sql/t-sql/queries/select-examples-transact-sql?view=sql-server-ver15 */
+            sqls.add("SELECT * FROM Production.Product ORDER BY Name ASC;");
+            sqls.add("SELECT Name, ProductNumber, ListPrice AS Price FROM Production.Product ");
+            sqls.add("SELECT 'Total income is', ((OrderQty * UnitPrice) * (1.0 - UnitPriceDiscount)), ' for ', p.Name AS ProductName FROM Production.Product AS p INNER JOIN Sales.SalesOrderDetail AS sod ON p.ProductID = sod.ProductID ORDER BY ProductName ASC;"); 
+            sqls.add("DELETE FROM Bicycles");
+            sqls.add("SELECT * INTO Bicycles FROM AdventureWorks2012.Production.Product WHERE ProductNumber LIKE 'BK%';");
+            sqls.add("SELECT DISTINCT Name FROM Production.Product AS p WHERE EXISTS (SELECT * FROM Production.ProductModel AS pm WHERE p.ProductModelID = pm.ProductModelID AND pm.Name LIKE 'Long-Sleeve Logo Jersey%')");
             for(String sql : sqls) {
                 Statement stmt = CCJSqlParserUtil.parse(sql);
                 TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
                 List<String> tableList = tablesNamesFinder.getTableList(stmt);
+                List<String> tables = new ArrayList<String>();
                 for(String table: tableList) {
-                    System.out.println(table);
+                    tables.add(table);
                 }
+                System.out.println(sql + ": " + tables.stream().collect(Collectors.joining(", ")));
             }
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 }
